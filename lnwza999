@@ -43,7 +43,7 @@ local Window = Rayfield:CreateWindow({
       Subtitle = "กรุณาใส่กุญแจส่วนตัวเพื่อเข้าใช้งาน",
       Note = "คีย์นี้ผูกกับเครื่องโทรศัพท์เครื่องนี้เท่านั้น (ย้ายเครื่องใช้ไม่ได้)",
       FileName = "KeyConfig",
-      SaveKey = false,
+      SaveKey = true,
       GrabKeyFromSite = false,
       Key = { activeKey }
    }
