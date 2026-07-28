@@ -9,13 +9,13 @@ local deviceKeys = {
    ["721ef9cef47017a98efe7a8a4b509e0de8b990444b73d32ca9d60e0196d13c78"] = "lnwza999",     -- เครื่องคุณ = คีย์ของคุณ
    ["b530aa50f5a4eb053933b58b65a0b98a1b62aadd8ea2d2f7d6205e50905129e8"] = "yokai832",   -- เครื่องเพื่อน 1 = คีย์เครื่องเพื่อน 1
    ["8e84b2fa6c0fe395af892e16987e69a3c33cdb62f90ba512f6bb5d122e63a9a5"] = "yokai372",   -- เครื่องเพื่อน 2 = คีย์เครื่องเพื่อน 2
-   ["HWID-ของมือถือเพื่อน3"] = "yokai381",   -- เครื่องเพื่อน 4 = คีย์เครื่องเพื่อน 3
-   ["HWID-ของมือถือเพื่อน3"] = "yokai823",   -- เครื่องเพื่อน 5 = คีย์เครื่องเพื่อน 5
-   ["HWID-ของมือถือเพื่อน3"] = "yokai282",   -- เครื่องเพื่อน 6 = คีย์เครื่องเพื่อน 6
-   ["HWID-ของมือถือเพื่อน3"] = "yokai782",   -- เครื่องเพื่อน 7 = คีย์เครื่องเพื่อน 7
-   ["HWID-ของมือถือเพื่อน3"] = "yokai281",   -- เครื่องเพื่อน 8 = คีย์เครื่องเพื่อน 8
-   ["HWID-ของมือถือเพื่อน3"] = "yokai384",   -- เครื่องเพื่อน 9 = คีย์เครื่องเพื่อน 9
-   ["HWID-ของมือถือเพื่อน3"] = "yokai304"    -- เครื่องเพื่อน 10 = คีย์เครื่องเพื่อน 10
+   ["HWID-ของมือถือเพื่อน3"] = "yokai381",   -- เครื่องเพื่อน 3 (เปลี่ยน HWID เมื่อเพื่อนส่งมา)
+   ["HWID-ของมือถือเพื่อน4"] = "yokai823",   -- เครื่องเพื่อน 4
+   ["HWID-ของมือถือเพื่อน5"] = "yokai282",   -- เครื่องเพื่อน 5
+   ["HWID-ของมือถือเพื่อน6"] = "yokai782",   -- เครื่องเพื่อน 6
+   ["HWID-ของมือถือเพื่อน7"] = "yokai281",   -- เครื่องเพื่อน 7
+   ["HWID-ของมือถือเพื่อน8"] = "yokai384",   -- เครื่องเพื่อน 8
+   ["HWID-ของมือถือเพื่อน9"] = "yokai304"    -- เครื่องเพื่อน 9
 }
 
 -- ตรวจสอบ: ถ้า HWID ของโทรศัพท์เครื่องนี้ตรงในตาราง ถึงจะดึงคีย์มาใช้งาน
@@ -49,16 +49,20 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- แท็บที่ 1: หน้าหลัก (ฟาร์มเงิน)
+-- แท็บที่ 1: หน้าหลัก (ฟาร์มเงิน & โอนเงิน)
 local TabMain = Window:CreateTab("Main", 4483362458)
 -- แท็บที่ 2: เสกอาคม
 local TabMagic = Window:CreateTab("เสกอาคม", 4483362458)
 -- แท็บที่ 3: เสกปืน
 local TabGuns = Window:CreateTab("เสกปืน 🔫", 4483362458)
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 local catchRemote = game:GetService("ReplicatedStorage"):WaitForChild("FishDev"):WaitForChild("Remote"):WaitForChild("CaughRemote")
 local sellRemote = workspace:WaitForChild("FishingSeller"):WaitForChild("dialogScript"):WaitForChild("RemoteEvent")
 local useItemRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("UseItem")
+local transferMoneyRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("TransferMoneyRequest")
 
 local catchArgs = { true, "Easy" }
 local sellArgs = { "SellFish" }
@@ -67,8 +71,13 @@ local autoFarm = false
 local autoKick = false
 local startMoney = 0
 
+-- ตัวแปรสำหรับระบบโอนเงิน
+local selectedTargetPlayer = nil
+local transferAmount = 10
+local autoTransfer = false
+
 -- =========================================================================
--- [ หมวดหมู่ 1: ระบบฟาร์มเงิน & Auto Kick ]
+-- [ หมวดหมู่ 1: ระบบฟาร์มเงิน & โอนเงินอัตโนมัติ ]
 -- =========================================================================
 
 TabMain:CreateLabel("⚠️ คำเตือน: มีความเสี่ยงจะโดนแบน โปรดใช้อย่างระวัง แนะนำใช้กับรหัสรองแล้วค่อยโอนให้รหัสหลัก")
@@ -89,8 +98,7 @@ TabMain:CreateToggle({
    Callback = function(Value)
        autoKick = Value
        if Value then
-           local player = game:GetService("Players").LocalPlayer
-           local leaderstats = player:FindFirstChild("leaderstats")
+           local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
            if leaderstats then
                local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
                if money then
@@ -100,6 +108,96 @@ TabMain:CreateToggle({
        end
    end,
 })
+
+TabMain:CreateDivider()
+TabMain:CreateLabel("💸 ระบบโอนเงินให้เพื่อน (เลือกคนในเซิร์ฟเวอร์ได้)")
+
+-- ฟังก์ชันดึงรายชื่อผู้เล่นในเซิร์ฟ
+local function getPlayerNames()
+    local list = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(list, p.Name)
+        end
+    end
+    if #list == 0 then
+        table.insert(list, "ไม่พบผู้เล่นอื่นในเซิฟ")
+    end
+    return list
+end
+
+local playerDropdown = TabMain:CreateDropdown({
+   Name = "เลือกรายชื่อผู้เล่นในเซิร์ฟ",
+   Options = getPlayerNames(),
+   CurrentOption = "",
+   MultipleOptions = false,
+   Flag = "SelectPlayerDropdown",
+   Callback = function(Option)
+       local targetName = type(Option) == "table" and Option[1] or Option
+       local target = Players:FindFirstChild(targetName)
+       if target then
+           selectedTargetPlayer = target
+       end
+   end,
+})
+
+-- ปุ่มรีเฟรชรายชื่อคนในเซิร์ฟ
+TabMain:CreateButton({
+    Name = "🔄 รีเฟรชรายชื่อผู้เล่นในเซิร์ฟ",
+    Callback = function()
+        playerDropdown:Refresh(getPlayerNames(), true)
+    end,
+})
+
+TabMain:CreateInput({
+   Name = "จำนวนเงินที่ต้องการโอนต่อครั้ง",
+   PlaceholderText = "ใส่ตัวเลข เช่น 10",
+   NumbersOnly = true,
+   CurrentValue = "10",
+   Flag = "TransferAmountInput",
+   Callback = function(Text)
+       local num = tonumber(Text)
+       if num then
+           transferAmount = num
+       end
+   end,
+})
+
+-- ปุ่มกดโอนทันที
+TabMain:CreateButton({
+   Name = "📤 กดโอนเงินทันที (ตามจำนวนด้านบน)",
+   Callback = function()
+       if selectedTargetPlayer and selectedTargetPlayer.Parent then
+           local args = {
+               selectedTargetPlayer.UserId,
+               transferAmount
+           }
+           transferMoneyRemote:FireServer(unpack(args))
+           Rayfield:Notify({
+               Title = "โอนเงินสำเร็จ",
+               Content = "โอนเงินจำนวน " .. transferAmount .. " ให้กับ " .. selectedTargetPlayer.Name .. " เรียบร้อย!",
+               Duration = 3,
+           })
+       else
+           Rayfield:Notify({
+               Title = "เกิดข้อผิดพลาด",
+               Content = "กรุณาเลือกผู้เล่นที่จะโอนเงินให้ก่อน!",
+               Duration = 3,
+           })
+       end
+   end,
+})
+
+-- ปุ่มเปิด/ปิด โอนเงินอัตโนมัติ
+TabMain:CreateToggle({
+   Name = "🔄 เปิดระบบโอนเงินอัตโนมัติ",
+   CurrentValue = false,
+   Flag = "AutoTransferToggle",
+   Callback = function(Value)
+       autoTransfer = Value
+   end,
+})
+
 
 -- =========================================================================
 -- [ หมวดหมู่ 2: ระบบเสกอาคม (กดแตะเพื่อใช้) ]
@@ -198,6 +296,24 @@ task.spawn(function()
                 end
             end
             task.wait(0.5)
+        else
+            task.wait(0.5)
+        end
+    end
+end)
+
+-- ลูป Auto Transfer (โอนเงินอัตโนมัติ)
+task.spawn(function()
+    while true do
+        if autoTransfer and selectedTargetPlayer and selectedTargetPlayer.Parent then
+            local args = {
+                selectedTargetPlayer.UserId,
+                transferAmount
+            }
+            pcall(function()
+                transferMoneyRemote:FireServer(unpack(args))
+            end)
+            task.wait(1) -- โอนทุกๆ 1 วินาที
         else
             task.wait(0.5)
         end
