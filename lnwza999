@@ -1,31 +1,36 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- โหลด Rayfield แบบซ่อน Error ป้องกันการค้าง
+local success, Rayfield = pcall(function()
+    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+end)
 
--- 1. ดึง รหัสประจำเครื่อง (HWID) ของโทรศัพท์เครื่องที่กำลังรันอยู่
+if not success or not Rayfield then
+    warn("ไม่สามารถโหลด Rayfield UI ได้ กรุณาเช็คอินเทอร์เน็ตหรือลิงก์เมนู")
+    return
+end
+
+-- 1. ดึง รหัสประจำเครื่อง (HWID)
 local getHWID = gethwid or function() return game:GetService("RbxAnalyticsService"):GetClientId() end
 local myHWID = getHWID()
 
--- 📌 2. ตั้งค่า [ "รหัสเครื่องโทรศัพท์ (HWID)" = "คีย์ประจำเครื่อง" ]
+-- 📌 2. ตั้งค่า HWID = คีย์
 local deviceKeys = {
-   ["721ef9cef47017a98efe7a8a4b509e0de8b990444b73d32ca9d60e0196d13c78"] = "lnwza999",     -- เครื่องคุณ = คีย์ของคุณ
-   ["b530aa50f5a4eb053933b58b65a0b98a1b62aadd8ea2d2f7d6205e50905129e8"] = "yokai832",   -- เครื่องเพื่อน 1 = คีย์เครื่องเพื่อน 1
-   ["8e84b2fa6c0fe395af892e16987e69a3c33cdb62f90ba512f6bb5d122e63a9a5"] = "yokai372",   -- เครื่องเพื่อน 2 = คีย์เครื่องเพื่อน 2
-   ["HWID-ของมือถือเพื่อน3"] = "yokai381",   -- เครื่องเพื่อน 3 (เปลี่ยน HWID เมื่อเพื่อนส่งมา)
-   ["HWID-ของมือถือเพื่อน4"] = "yokai823",   -- เครื่องเพื่อน 4
-   ["HWID-ของมือถือเพื่อน5"] = "yokai282",   -- เครื่องเพื่อน 5
-   ["HWID-ของมือถือเพื่อน6"] = "yokai782",   -- เครื่องเพื่อน 6
-   ["HWID-ของมือถือเพื่อน7"] = "yokai281",   -- เครื่องเพื่อน 7
-   ["HWID-ของมือถือเพื่อน8"] = "yokai384",   -- เครื่องเพื่อน 8
-   ["HWID-ของมือถือเพื่อน9"] = "yokai304"    -- เครื่องเพื่อน 9
+   ["721ef9cef47017a98efe7a8a4b509e0de8b990444b73d32ca9d60e0196d13c78"] = "lnwza999",     -- เครื่องคุณ
+   ["b530aa50f5a4eb053933b58b65a0b98a1b62aadd8ea2d2f7d6205e50905129e8"] = "yokai832",   -- เครื่องเพื่อน 1
+   ["8e84b2fa6c0fe395af892e16987e69a3c33cdb62f90ba512f6bb5d122e63a9a5"] = "yokai372",   -- เครื่องเพื่อน 2
+   ["HWID-ของมือถือเพื่อน3"] = "yokai381",
+   ["HWID-ของมือถือเพื่อน4"] = "yokai823",
+   ["HWID-ของมือถือเพื่อน5"] = "yokai282",
+   ["HWID-ของมือถือเพื่อน6"] = "yokai782",
+   ["HWID-ของมือถือเพื่อน7"] = "yokai281",
+   ["HWID-ของมือถือเพื่อน8"] = "yokai384",
+   ["HWID-ของมือถือเพื่อน9"] = "yokai304"
 }
 
--- ตรวจสอบ: ถ้า HWID ของโทรศัพท์เครื่องนี้ตรงในตาราง ถึงจะดึงคีย์มาใช้งาน
 local activeKey = deviceKeys[myHWID] or "DEVICE-NOT-ALLOWED-KEY"
 
--- (ตัวเลือกเสริม) ถ้าเครื่องนี้ไม่อยู่ในตาราง สามารถสั่งให้ก๊อปปี้ HWID ส่งมาให้คุณตั้งค่าได้
 if not deviceKeys[myHWID] and setclipboard then
-    setclipboard(myHWID)
-    -- เด้งเตือนในเกมว่าก๊อป HWID ให้แล้ว
-    print("เครื่องนี้ยังไม่ได้รับอนุญาต! HWID ของเครื่องคุณคือ: " .. myHWID .. " (ก๊อปปี้ลง Clipboard ให้แล้ว)")
+    pcall(function() setclipboard(myHWID) end)
+    print("เครื่องนี้ยังไม่ได้รับอนุญาต! HWID: " .. myHWID)
 end
 
 local Window = Rayfield:CreateWindow({
@@ -34,14 +39,11 @@ local Window = Rayfield:CreateWindow({
    LoadingSubtitle = "by lnwza999",
    ConfigurationSaving = { Enabled = false },
    
-   -- =========================================================================
-   -- [ ระบบกุญแจ (Key System) - ล็อก 1 คีย์ ต่อ 1 เครื่องโทรศัพท์ ]
-   -- =========================================================================
    KeySystem = true,
    KeySettings = {
       Title = "ระบบยืนยันตัวตน 🔑",
       Subtitle = "กรุณาใส่กุญแจส่วนตัวเพื่อเข้าใช้งาน",
-      Note = "คีย์นี้ผูกกับเครื่องโทรศัพท์เครื่องนี้เท่านั้น (ย้ายเครื่องใช้ไม่ได้)",
+      Note = "คีย์นี้ผูกกับเครื่องโทรศัพท์เครื่องนี้เท่านั้น",
       FileName = "MyScriptKeyConfig",
       SaveKey = true,
       GrabKeyFromSite = false,
@@ -49,20 +51,27 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- แท็บที่ 1: หน้าหลัก (ฟาร์มเงิน & โอนเงิน)
-local TabMain = Window:CreateTab("Main", 4483362458)
--- แท็บที่ 2: เสกอาคม
+-- =========================================================================
+-- [ สร้างแท็บ ]
+-- =========================================================================
+local TabMain = Window:CreateTab("เสกเงิน🤑", 4483362458)
 local TabMagic = Window:CreateTab("เสกอาคม", 4483362458)
--- แท็บที่ 3: เสกปืน
 local TabGuns = Window:CreateTab("เสกปืน 🔫", 4483362458)
+local TabAimbot = Window:CreateTab("Aimbot 🎯", 4483362458)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera or workspace:FindFirstChildOfClass("Camera")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local GuiService = game:GetService("GuiService")
 
-local catchRemote = game:GetService("ReplicatedStorage"):WaitForChild("FishDev"):WaitForChild("Remote"):WaitForChild("CaughRemote")
-local sellRemote = workspace:WaitForChild("FishingSeller"):WaitForChild("dialogScript"):WaitForChild("RemoteEvent")
-local useItemRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("UseItem")
-local transferMoneyRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("TransferMoneyRequest")
+-- ดึง Remote แบบปลอดภัยไม่ให้สคริปต์หยุดชะงัก
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local catchRemote = ReplicatedStorage:FindFirstChild("FishDev") and ReplicatedStorage.FishDev:FindFirstChild("Remote") and ReplicatedStorage.FishDev.Remote:FindFirstChild("CaughRemote")
+local sellRemote = workspace:FindFirstChild("FishingSeller") and workspace.FishingSeller:FindFirstChild("dialogScript") and workspace.FishingSeller.dialogScript:FindFirstChild("RemoteEvent")
+local useItemRemote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("UseItem")
+local transferMoneyRemote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("TransferMoneyRequest")
 
 local catchArgs = { true, "Easy" }
 local sellArgs = { "SellFish" }
@@ -71,7 +80,6 @@ local autoFarm = false
 local autoKick = false
 local startMoney = 0
 
--- ตัวแปรสำหรับระบบโอนเงิน
 local selectedTargetPlayer = nil
 local transferAmount = 10
 local autoTransfer = false
@@ -80,15 +88,13 @@ local autoTransfer = false
 -- [ หมวดหมู่ 1: ระบบฟาร์มเงิน & โอนเงินอัตโนมัติ ]
 -- =========================================================================
 
-TabMain:CreateLabel("⚠️ คำเตือน: มีความเสี่ยงจะโดนแบน โปรดใช้อย่างระวัง แนะนำใช้กับรหัสรองแล้วค่อยโอนให้รหัสหลัก")
+TabMain:CreateLabel("⚠️ คำเตือน: มีความเสี่ยงจะโดนแบน โปรดใช้อย่างระวัง")
 
 TabMain:CreateToggle({
-   Name = "ใครอยากรวยกด🤑🤑 คำเตือน!!แนะนำใช้กับรหัสรองละค่อยโอนให้รหัสหลักมีโอกาศจะโดนแบนได้",
+   Name = "ใครอยากรวยกด🤑🤑 (แนะนำใช้รหัสรองฟาร์มแล้วโอนเข้าหลัก)",
    CurrentValue = false,
    Flag = "AutoFarmToggle",
-   Callback = function(Value)
-       autoFarm = Value
-   end,
+   Callback = function(Value) autoFarm = Value end,
 })
 
 TabMain:CreateToggle({
@@ -101,28 +107,21 @@ TabMain:CreateToggle({
            local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
            if leaderstats then
                local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
-               if money then
-                   startMoney = money.Value
-               end
+               if money then startMoney = money.Value end
            end
        end
    end,
 })
 
 TabMain:CreateDivider()
-TabMain:CreateLabel("💸 ระบบโอนเงินให้เพื่อน (เลือกคนในเซิร์ฟเวอร์ได้)")
+TabMain:CreateLabel("💸 ระบบโอนเงินให้เพื่อน")
 
--- ฟังก์ชันดึงรายชื่อผู้เล่นในเซิร์ฟ
 local function getPlayerNames()
     local list = {}
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(list, p.Name)
-        end
+        if p ~= LocalPlayer then table.insert(list, p.Name) end
     end
-    if #list == 0 then
-        table.insert(list, "ไม่พบผู้เล่นอื่นในเซิฟ")
-    end
+    if #list == 0 then table.insert(list, "ไม่พบผู้เล่นอื่นในเซิฟ") end
     return list
 end
 
@@ -135,18 +134,13 @@ local playerDropdown = TabMain:CreateDropdown({
    Callback = function(Option)
        local targetName = type(Option) == "table" and Option[1] or Option
        local target = Players:FindFirstChild(targetName)
-       if target then
-           selectedTargetPlayer = target
-       end
+       if target then selectedTargetPlayer = target end
    end,
 })
 
--- ปุ่มรีเฟรชรายชื่อคนในเซิร์ฟ
 TabMain:CreateButton({
     Name = "🔄 รีเฟรชรายชื่อผู้เล่นในเซิร์ฟ",
-    Callback = function()
-        playerDropdown:Refresh(getPlayerNames(), true)
-    end,
+    Callback = function() playerDropdown:Refresh(getPlayerNames(), true) end,
 })
 
 TabMain:CreateInput({
@@ -157,53 +151,36 @@ TabMain:CreateInput({
    Flag = "TransferAmountInput",
    Callback = function(Text)
        local num = tonumber(Text)
-       if num then
-           transferAmount = num
-       end
+       if num then transferAmount = num end
    end,
 })
 
--- ปุ่มกดโอนทันที
 TabMain:CreateButton({
    Name = "📤 กดโอนเงินทันที (ตามจำนวนด้านบน)",
    Callback = function()
-       if selectedTargetPlayer and selectedTargetPlayer.Parent then
-           local args = {
-               selectedTargetPlayer.UserId,
-               transferAmount
-           }
-           transferMoneyRemote:FireServer(unpack(args))
+       if selectedTargetPlayer and selectedTargetPlayer.Parent and transferMoneyRemote then
+           transferMoneyRemote:FireServer(selectedTargetPlayer.UserId, transferAmount)
            Rayfield:Notify({
                Title = "โอนเงินสำเร็จ",
-               Content = "โอนเงินจำนวน " .. transferAmount .. " ให้กับ " .. selectedTargetPlayer.Name .. " เรียบร้อย!",
+               Content = "โอนเงินจำนวน " .. transferAmount .. " ให้กับ " .. selectedTargetPlayer.Name,
                Duration = 3,
            })
        else
-           Rayfield:Notify({
-               Title = "เกิดข้อผิดพลาด",
-               Content = "กรุณาเลือกผู้เล่นที่จะโอนเงินให้ก่อน!",
-               Duration = 3,
-           })
+           Rayfield:Notify({ Title = "เกิดข้อผิดพลาด", Content = "กรุณาเลือกผู้เล่น หรือระบบโอนยังไม่พร้อม!", Duration = 3 })
        end
    end,
 })
 
--- ปุ่มเปิด/ปิด โอนเงินอัตโนมัติ
 TabMain:CreateToggle({
    Name = "🔄 เปิดระบบโอนเงินอัตโนมัติ",
    CurrentValue = false,
    Flag = "AutoTransferToggle",
-   Callback = function(Value)
-       autoTransfer = Value
-   end,
+   Callback = function(Value) autoTransfer = Value end,
 })
 
-
 -- =========================================================================
--- [ หมวดหมู่ 2: ระบบเสกอาคม (กดแตะเพื่อใช้) ]
+-- [ หมวดหมู่ 2 & 3: เสกอาคม & เสกปืน ]
 -- =========================================================================
-
-TabMagic:CreateLabel("⚠️ คำเตือน: การเสกอาคมจะไม่เสกเข้ากระเป๋าในตัวเกม แต่จะเสกเข้าตัวละคร เมื่อออกเข้าใหม่จะไม่หาย แต่ในกระเป๋าตัวเกมจะไม่มีขึ้น โปรดใช้แบบระวัง")
 
 local spells = {
     {Name = "อาคมลิง (Monkey)", Item = "Monkey"},
@@ -217,22 +194,14 @@ local spells = {
     {Name = "อาคมกระสุนคด (BulletKot)", Item = "BulletKot"},
     {Name = "อาคมเสกแตน (Sektan)", Item = "Sektan"}
 }
-
 for _, spell in ipairs(spells) do
-    TabMagic:CreateButton({
-        Name = "ใช้อาคม: " .. spell.Name,
-        Callback = function()
-            useItemRemote:FireServer(spell.Item)
-        end,
+    TabMagic:CreateButton({ 
+        Name = "ใช้อาคม: " .. spell.Name, 
+        Callback = function() 
+            if useItemRemote then useItemRemote:FireServer(spell.Item) end 
+        end 
     })
 end
-
--- =========================================================================
--- [ หมวดหมู่ 3: ระบบเสกปืน (กดแตะเพื่อใช้) ]
--- =========================================================================
-
-TabGuns:CreateLabel("⚠️ คำเตือน: การเสกปืนจะไม่เสกเข้ากระเป๋าในตัวเกม แต่จะเสกเข้าตัวละคร เมื่อออกเข้าใหม่จะไม่หาย แต่ในกระเป๋าตัวเกมจะไม่มีปืนขึ้น โปรดใช้แบบระวัง")
-TabGuns:CreateLabel("📌 วิธีใช้: กดปืนที่จะเสก ถ้าจะเอาปืนออก ให้กดปืนที่เสกมาอีกรอบ ปืนก็จะหาย")
 
 local guns = {
     {Name = "USP", Item = "USP"},
@@ -245,38 +214,194 @@ local guns = {
     {Name = "M1Garand", Item = "M1Garand"},
     {Name = "เชือกคาวบอย", Item = "CowboyRope"}
 }
-
 for _, gun in ipairs(guns) do
-    TabGuns:CreateButton({
-        Name = "เสกปืน: " .. gun.Name,
-        Callback = function()
-            useItemRemote:FireServer(gun.Item)
-        end,
+    TabGuns:CreateButton({ 
+        Name = "เสกปืน: " .. gun.Name, 
+        Callback = function() 
+            if useItemRemote then useItemRemote:FireServer(gun.Item) end 
+        end 
     })
 end
 
 -- =========================================================================
--- [ ลูปการทำงานฝั่ง Background ]
+-- [ หมวดหมู่ 4: ระบบ Aimbot ]
 -- =========================================================================
 
-task.spawn(function()
-    while true do
-        if autoFarm then
-            catchRemote:FireServer(unpack(catchArgs))
-            task.wait(0.05)
-        else
-            task.wait(0.2)
+TabAimbot:CreateLabel("🎯 ระบบ Aimbot")
+
+local aimbotEnabled = false
+local aimbotTeamCheck = false
+local aimbotWallCheck = false -- เปิดให้ล็อกข้ามกำแพงตั้งแต่เริ่มต้น
+local fovRadius = 100
+local fovVisible = true
+
+--  วงกลม FOV
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AimbotMobileFOV"
+ScreenGui.IgnoreGuiInset = false
+pcall(function() ScreenGui.Parent = CoreGui end)
+if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+
+local FOVFrame = Instance.new("Frame")
+FOVFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVFrame.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
+FOVFrame.BackgroundTransparency = 1
+FOVFrame.Visible = false
+FOVFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(1, 0)
+UICorner.Parent = FOVFrame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(255, 255, 255)
+UIStroke.Thickness = 2
+UIStroke.Parent = FOVFrame
+
+TabAimbot:CreateToggle({
+   Name = "เปิด/ปิด Aimbot (ล็อกเป้า)",
+   CurrentValue = false,
+   Flag = "AimbotToggle",
+   Callback = function(Value)
+       aimbotEnabled = Value
+       FOVFrame.Visible = fovVisible and Value
+   end,
+})
+
+TabAimbot:CreateToggle({
+   Name = "ไม่ล็อกทีมตัวเอง (Team Check)",
+   CurrentValue = false,
+   Flag = "AimbotTeamCheckToggle",
+   Callback = function(Value) aimbotTeamCheck = Value end,
+})
+
+TabAimbot:CreateToggle({
+   Name = " ล็อกข้ามกำแพง (Wall Check)",
+   CurrentValue = false,
+   Flag = "AimbotWallCheckToggle",
+   Callback = function(Value) aimbotWallCheck = Value end,
+})
+
+TabAimbot:CreateDivider()
+
+TabAimbot:CreateToggle({
+   Name = " แสดงวงกลม FOV ",
+   CurrentValue = true,
+   Flag = "FOVVisibleToggle",
+   Callback = function(Value)
+       fovVisible = Value
+       FOVFrame.Visible = Value and aimbotEnabled
+   end,
+})
+
+TabAimbot:CreateSlider({
+   Name = "ปรับขนาดวงกลมล็อกเป้า (FOV Size)",
+   Range = {30, 300},
+   Increment = 5,
+   Suffix = " px",
+   CurrentValue = 100,
+   Flag = "FOVRadiusSlider",
+   Callback = function(Value)
+       fovRadius = Value
+       FOVFrame.Size = UDim2.new(0, Value * 2, 0, Value * 2)
+   end,
+})
+
+-- ฟังก์ชันเช็คกำแพง
+local function isTargetVisible(targetPart)
+    if not aimbotWallCheck then return true end
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = RaycastFilterType.Exclude
+    if LocalPlayer.Character then
+        raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetPart.Parent}
+    end
+    raycastParams.IgnoreWater = true
+
+    local origin = workspace.CurrentCamera.CFrame.Position
+    local direction = (targetPart.Position - origin)
+    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+    return raycastResult == nil
+end
+
+-- ฟังก์ชันคำนวณจุดศูนย์กลางจอ
+local function getCenterScreen()
+    local cam = workspace.CurrentCamera
+    if not cam then return Vector2.new(0,0) end
+    local viewportSize = cam.ViewportSize
+    local inset = GuiService:GetGuiInset()
+    return Vector2.new(viewportSize.X / 2, (viewportSize.Y - inset.Y) / 2)
+end
+
+-- ฟังก์ชันหาเป้าหมาย
+local function getClosestPlayer()
+    local targetPart = nil
+    local shortestDistance = fovRadius
+    local screenCenter = getCenterScreen()
+    local cam = workspace.CurrentCamera
+
+    if not cam then return nil end
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+            
+            if humanoid and humanoid.Health > 0 and rootPart then
+                local isEnemy = true
+                if aimbotTeamCheck and LocalPlayer.Team and player.Team and LocalPlayer.Team == player.Team then
+                    isEnemy = false
+                end
+
+                if isEnemy then
+                    local screenPoint, onScreen = cam:WorldToViewportPoint(rootPart.Position)
+                    if onScreen then
+                        local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
+
+                        if distance < shortestDistance and isTargetVisible(rootPart) then
+                            shortestDistance = distance
+                            targetPart = rootPart
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return targetPart
+end
+
+-- =========================================================================
+-- [ ลูปการทำงาน Aimbot & Background ]
+-- =========================================================================
+
+RunService.RenderStepped:Connect(function()
+    if aimbotEnabled then
+        local targetPart = getClosestPlayer()
+        local cam = workspace.CurrentCamera
+        if targetPart and cam then
+            cam.CFrame = CFrame.new(cam.CFrame.Position, targetPart.Position)
         end
     end
 end)
 
 task.spawn(function()
     while true do
-        if autoFarm then
-            sellRemote:FireServer(unpack(sellArgs))
+        if autoFarm and catchRemote then 
+            pcall(function() catchRemote:FireServer(unpack(catchArgs)) end)
             task.wait(0.05)
-        else
-            task.wait(0.2)
+        else 
+            task.wait(0.2) 
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if autoFarm and sellRemote then 
+            pcall(function() sellRemote:FireServer(unpack(sellArgs)) end)
+            task.wait(0.05)
+        else 
+            task.wait(0.2) 
         end
     end
 end)
@@ -284,38 +409,28 @@ end)
 task.spawn(function()
     while true do
         if autoKick then
-            local player = game:GetService("Players").LocalPlayer
-            local leaderstats = player:FindFirstChild("leaderstats")
-            
+            local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
             if leaderstats then
                 local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
-                
                 if money and (money.Value - startMoney) >= 10000 then
-                    player:Kick("ฟาร์มเงินเพิ่มได้ครบ 10,000 เรียบร้อยแล้ว! (ระบบเตะให้อัตโนมัติ)")
+                    LocalPlayer:Kick("ฟาร์มเงินครบ 10,000 เรียบร้อยแล้ว!")
                     break
                 end
             end
             task.wait(0.5)
-        else
-            task.wait(0.5)
+        else 
+            task.wait(0.5) 
         end
     end
 end)
 
--- ลูป Auto Transfer (โอนเงินอัตโนมัติ)
 task.spawn(function()
     while true do
-        if autoTransfer and selectedTargetPlayer and selectedTargetPlayer.Parent then
-            local args = {
-                selectedTargetPlayer.UserId,
-                transferAmount
-            }
-            pcall(function()
-                transferMoneyRemote:FireServer(unpack(args))
-            end)
-            task.wait(1) -- โอนทุกๆ 1 วินาที
-        else
-            task.wait(0.5)
+        if autoTransfer and selectedTargetPlayer and selectedTargetPlayer.Parent and transferMoneyRemote then
+            pcall(function() transferMoneyRemote:FireServer(selectedTargetPlayer.UserId, transferAmount) end)
+            task.wait(1)
+        else 
+            task.wait(0.5) 
         end
     end
 end)
