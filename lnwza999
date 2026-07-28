@@ -1,0 +1,198 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- 1. ดึง รหัสประจำเครื่อง (HWID) ของโทรศัพท์เครื่องที่กำลังรันอยู่
+local getHWID = gethwid or function() return game:GetService("RbxAnalyticsService"):GetClientId() end
+local myHWID = getHWID()
+
+-- 📌 2. ตั้งค่า [ "รหัสเครื่องโทรศัพท์ (HWID)" = "คีย์ประจำเครื่อง" ]
+local deviceKeys = {
+   ["HWID-ของโทรศัพท์คุณ"] = "lnwza999",     -- เครื่องคุณ = คีย์ของคุณ
+   ["HWID-ของมือถือเพื่อน1"] = "yokai832",   -- เครื่องเพื่อน 1 = คีย์เครื่องเพื่อน 1
+   ["HWID-ของมือถือเพื่อน2"] = "yokai372"    -- เครื่องเพื่อน 2 = คีย์เครื่องเพื่อน 2
+}
+
+-- ตรวจสอบ: ถ้า HWID ของโทรศัพท์เครื่องนี้ตรงในตาราง ถึงจะดึงคีย์มาใช้งาน
+local activeKey = deviceKeys[myHWID] or "DEVICE-NOT-ALLOWED-KEY"
+
+-- (ตัวเลือกเสริม) ถ้าเครื่องนี้ไม่อยู่ในตาราง สามารถสั่งให้ก๊อปปี้ HWID ส่งมาให้คุณตั้งค่าได้
+if not deviceKeys[myHWID] and setclipboard then
+    setclipboard(myHWID)
+    -- เด้งเตือนในเกมว่าก๊อป HWID ให้แล้ว
+    print("เครื่องนี้ยังไม่ได้รับอนุญาต! HWID ของเครื่องคุณคือ: " .. myHWID .. " (ก๊อปปี้ลง Clipboard ให้แล้ว)")
+end
+
+local Window = Rayfield:CreateWindow({
+   Name = "เสกเงินแบบโหด🤑",
+   LoadingTitle = "รอหน่อยเดียวอร่อยแน่",
+   LoadingSubtitle = "by lnwza999",
+   ConfigurationSaving = { Enabled = false },
+   
+   -- =========================================================================
+   -- [ ระบบกุญแจ (Key System) - ล็อก 1 คีย์ ต่อ 1 เครื่องโทรศัพท์ ]
+   -- =========================================================================
+   KeySystem = true,
+   KeySettings = {
+      Title = "ระบบยืนยันตัวตน 🔑",
+      Subtitle = "กรุณาใส่กุญแจส่วนตัวเพื่อเข้าใช้งาน",
+      Note = "คีย์นี้ผูกกับเครื่องโทรศัพท์เครื่องนี้เท่านั้น (ย้ายเครื่องใช้ไม่ได้)",
+      FileName = "KeyConfig",
+      SaveKey = false,
+      GrabKeyFromSite = false,
+      Key = { activeKey }
+   }
+})
+
+-- แท็บที่ 1: หน้าหลัก (ฟาร์มเงิน)
+local TabMain = Window:CreateTab("Main", 4483362458)
+-- แท็บที่ 2: เสกอาคม
+local TabMagic = Window:CreateTab("เสกอาคม", 4483362458)
+-- แท็บที่ 3: เสกปืน
+local TabGuns = Window:CreateTab("เสกปืน 🔫", 4483362458)
+
+local catchRemote = game:GetService("ReplicatedStorage"):WaitForChild("FishDev"):WaitForChild("Remote"):WaitForChild("CaughRemote")
+local sellRemote = workspace:WaitForChild("FishingSeller"):WaitForChild("dialogScript"):WaitForChild("RemoteEvent")
+local useItemRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("UseItem")
+
+local catchArgs = { true, "Easy" }
+local sellArgs = { "SellFish" }
+
+local autoFarm = false
+local autoKick = false
+local startMoney = 0
+
+-- =========================================================================
+-- [ หมวดหมู่ 1: ระบบฟาร์มเงิน & Auto Kick ]
+-- =========================================================================
+
+TabMain:CreateLabel("⚠️ คำเตือน: มีความเสี่ยงจะโดนแบน โปรดใช้อย่างระวัง แนะนำใช้กับรหัสรองแล้วค่อยโอนให้รหัสหลัก")
+
+TabMain:CreateToggle({
+   Name = "ใครอยากรวยกด🤑🤑 คำเตือน!!แนะนำใช้กับรหัสรองละค่อยโอนให้รหัสหลักมีโอกาศจะโดนแบนได้",
+   CurrentValue = false,
+   Flag = "AutoFarmToggle",
+   Callback = function(Value)
+       autoFarm = Value
+   end,
+})
+
+TabMain:CreateToggle({
+   Name = "ฟาร์มได้เพิ่มครบ 10,000 แล้วเตะออกอัตโนมัติ",
+   CurrentValue = false,
+   Flag = "AutoKickToggle",
+   Callback = function(Value)
+       autoKick = Value
+       if Value then
+           local player = game:GetService("Players").LocalPlayer
+           local leaderstats = player:FindFirstChild("leaderstats")
+           if leaderstats then
+               local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
+               if money then
+                   startMoney = money.Value
+               end
+           end
+       end
+   end,
+})
+
+-- =========================================================================
+-- [ หมวดหมู่ 2: ระบบเสกอาคม (กดแตะเพื่อใช้) ]
+-- =========================================================================
+
+TabMagic:CreateLabel("⚠️ คำเตือน: การเสกอาคมจะไม่เสกเข้ากระเป๋าในตัวเกม แต่จะเสกเข้าตัวละคร เมื่อออกเข้าใหม่จะไม่หาย แต่ในกระเป๋าตัวเกมจะไม่มีขึ้น โปรดใช้แบบระวัง")
+
+local spells = {
+    {Name = "อาคมลิง (Monkey)", Item = "Monkey"},
+    {Name = "อาคมเสือ (Tiger)", Item = "Tiger"},
+    {Name = "อาคมอมตะ (NotDead)", Item = "NotDead"},
+    {Name = "อาคมหยุดเวลา (Zawarudo)", Item = "Zawarudo"},
+    {Name = "อาคมหมัดธนู (ArrowFist)", Item = "ArrowFist"},
+    {Name = "อาคมล่องหน (Invisible)", Item = "Invisible"},
+    {Name = "อาคมเรียกศพ (Necromance)", Item = "Necromance"},
+    {Name = "อาคมตาบอด (Blind)", Item = "Blind"},
+    {Name = "อาคมกระสุนคด (BulletKot)", Item = "BulletKot"},
+    {Name = "อาคมเสกแตน (Sektan)", Item = "Sektan"}
+}
+
+for _, spell in ipairs(spells) do
+    TabMagic:CreateButton({
+        Name = "ใช้อาคม: " .. spell.Name,
+        Callback = function()
+            useItemRemote:FireServer(spell.Item)
+        end,
+    })
+end
+
+-- =========================================================================
+-- [ หมวดหมู่ 3: ระบบเสกปืน (กดแตะเพื่อใช้) ]
+-- =========================================================================
+
+TabGuns:CreateLabel("⚠️ คำเตือน: การเสกปืนจะไม่เสกเข้ากระเป๋าในตัวเกม แต่จะเสกเข้าตัวละคร เมื่อออกเข้าใหม่จะไม่หาย แต่ในกระเป๋าตัวเกมจะไม่มีปืนขึ้น โปรดใช้แบบระวัง")
+TabGuns:CreateLabel("📌 วิธีใช้: กดปืนที่จะเสก ถ้าจะเอาปืนออก ให้กดปืนที่เสกมาอีกรอบ ปืนก็จะหาย")
+
+local guns = {
+    {Name = "USP", Item = "USP"},
+    {Name = "Thompson", Item = "Thompson"},
+    {Name = "MP40", Item = "MP40"},
+    {Name = "M870", Item = "M870"},
+    {Name = "Karabiner", Item = "Karabiner"},
+    {Name = "SW", Item = "SW"},
+    {Name = "Mauser", Item = "Mauser"},
+    {Name = "M1Garand", Item = "M1Garand"},
+    {Name = "เชือกคาวบอย", Item = "CowboyRope"}
+}
+
+for _, gun in ipairs(guns) do
+    TabGuns:CreateButton({
+        Name = "เสกปืน: " .. gun.Name,
+        Callback = function()
+            useItemRemote:FireServer(gun.Item)
+        end,
+    })
+end
+
+-- =========================================================================
+-- [ ลูปการทำงานฝั่ง Background ]
+-- =========================================================================
+
+task.spawn(function()
+    while true do
+        if autoFarm then
+            catchRemote:FireServer(unpack(catchArgs))
+            task.wait(0.05)
+        else
+            task.wait(0.2)
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if autoFarm then
+            sellRemote:FireServer(unpack(sellArgs))
+            task.wait(0.05)
+        else
+            task.wait(0.2)
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if autoKick then
+            local player = game:GetService("Players").LocalPlayer
+            local leaderstats = player:FindFirstChild("leaderstats")
+            
+            if leaderstats then
+                local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
+                
+                if money and (money.Value - startMoney) >= 10000 then
+                    player:Kick("ฟาร์มเงินเพิ่มได้ครบ 10,000 เรียบร้อยแล้ว! (ระบบเตะให้อัตโนมัติ)")
+                    break
+                end
+            end
+            task.wait(0.5)
+        else
+            task.wait(0.5)
+        end
+    end
+end)
