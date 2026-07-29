@@ -1,418 +1,182 @@
--- โหลด Rayfield แบบซ่อน Error ป้องกันการค้าง
-local success, Rayfield = pcall(function()
-    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-end)
+-- โหลด Rayfield แบบซ่อน Error
+local success, Rayfield = pcall(function() return loadstring(game:HttpGet('https://sirius.menu/rayfield'))() end)
+if not success or not Rayfield then warn("ไม่สามารถโหลด Rayfield UI ได้") return end
 
-if not success or not Rayfield then
-    warn("ไม่สามารถโหลด Rayfield UI ได้ กรุณาเช็คอินเทอร์เน็ตหรือลิงก์เมนู")
-    return
-end
-
--- 1. ดึง รหัสประจำเครื่อง (HWID)
 local getHWID = gethwid or function() return game:GetService("RbxAnalyticsService"):GetClientId() end
 local myHWID = getHWID()
 
--- 📌 2. ตั้งค่า HWID = คีย์
 local deviceKeys = {
-   ["721ef9cef47017a98efe7a8a4b509e0de8b990444b73d32ca9d60e0196d13c78"] = "lnwza999",     -- เครื่องคุณ
-   ["b530aa50f5a4eb053933b58b65a0b98a1b62aadd8ea2d2f7d6205e50905129e8"] = "yokai832",   -- เครื่องเพื่อน 1
-   ["8e84b2fa6c0fe395af892e16987e69a3c33cdb62f90ba512f6bb5d122e63a9a5"] = "yokai372",   -- เครื่องเพื่อน 2
-   ["HWID-ของมือถือเพื่อน3"] = "yokai381",
-   ["HWID-ของมือถือเพื่อน4"] = "yokai823",
-   ["HWID-ของมือถือเพื่อน5"] = "yokai282",
-   ["HWID-ของมือถือเพื่อน6"] = "yokai782",
-   ["HWID-ของมือถือเพื่อน7"] = "yokai281",
-   ["HWID-ของมือถือเพื่อน8"] = "yokai384",
+   ["721ef9cef47017a98efe7a8a4b509e0de8b990444b73d32ca9d60e0196d13c78"] = "lnwza999",
+   ["b530aa50f5a4eb053933b58b65a0b98a1b62aadd8ea2d2f7d6205e50905129e8"] = "yokai832",
+   ["8e84b2fa6c0fe395af892e16987e69a3c33cdb62f90ba512f6bb5d122e63a9a5"] = "yokai372",
+   ["HWID-ของมือถือเพื่อน3"] = "yokai381", ["HWID-ของมือถือเพื่อน4"] = "yokai823",
+   ["HWID-ของมือถือเพื่อน5"] = "yokai282", ["HWID-ของมือถือเพื่อน6"] = "yokai782",
+   ["HWID-ของมือถือเพื่อน7"] = "yokai281", ["HWID-ของมือถือเพื่อน8"] = "yokai384",
    ["HWID-ของมือถือเพื่อน9"] = "yokai304"
 }
 
 local activeKey = deviceKeys[myHWID] or "DEVICE-NOT-ALLOWED-KEY"
-
-if not deviceKeys[myHWID] and setclipboard then
-    pcall(function() setclipboard(myHWID) end)
-    print("เครื่องนี้ยังไม่ได้รับอนุญาต! HWID: " .. myHWID)
-end
+if not deviceKeys[myHWID] and setclipboard then pcall(function() setclipboard(myHWID) end) end
 
 local Window = Rayfield:CreateWindow({
-   Name = "เสกเงินแบบโหด🤑",
-   LoadingTitle = "รอหน่อยเดียวอร่อยแน่",
-   LoadingSubtitle = "by lnwza999",
+   Name = "เสกเงินแบบโหด🤑", LoadingTitle = "รอหน่อยเดียวอร่อยแน่", LoadingSubtitle = "by lnwza999",
    ConfigurationSaving = { Enabled = false },
-   
    KeySystem = true,
-   KeySettings = {
-      Title = "ระบบยืนยันตัวตน 🔑",
-      Subtitle = "กรุณาใส่กุญแจส่วนตัวเพื่อเข้าใช้งาน",
-      Note = "คีย์นี้ผูกกับเครื่องโทรศัพท์เครื่องนี้เท่านั้น",
-      FileName = "MyScriptKeyConfig",
-      SaveKey = true,
-      GrabKeyFromSite = false,
-      Key = { activeKey }
-   }
+   KeySettings = { Title = "ระบบยืนยันตัวตน 🔑", Subtitle = "ใส่กุญแจส่วนตัว", Note = "ผูกกับเครื่องนี้เท่านั้น", SaveKey = true, Key = { activeKey } }
 })
 
--- =========================================================================
--- [ สร้างแท็บ ]
--- =========================================================================
-local TabMain = Window:CreateTab("เสกเงิน🤑", 4483362458)
-local TabMagic = Window:CreateTab("เสกอาคม", 4483362458)
-local TabGuns = Window:CreateTab("เสกปืน 🔫", 4483362458)
-local TabAimbot = Window:CreateTab("Aimbot 🎯", 4483362458)
+-- สร้างแท็บ
+local Tab1 = Window:CreateTab("เสกเงิน🤑", 4483362458)
+local Tab2 = Window:CreateTab("เสกอาคม", 4483362458)
+local Tab3 = Window:CreateTab("เสกปืน 🔫", 4483362458)
+local Tab4 = Window:CreateTab("Aimbot 🎯", 4483362458)
+local Tab5 = Window:CreateTab("AFK ฟาร์มเงิน 🤖", 4483362458)
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera or workspace:FindFirstChildOfClass("Camera")
-local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
-local GuiService = game:GetService("GuiService")
+local Players, RS, RunS, CoreGui, GuiS = game:GetService("Players"), game:GetService("ReplicatedStorage"), game:GetService("RunService"), game:GetService("CoreGui"), game:GetService("GuiService")
+local LP = Players.LocalPlayer
 
--- ดึง Remote แบบปลอดภัยไม่ให้สคริปต์หยุดชะงัก
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local catchRemote = ReplicatedStorage:FindFirstChild("FishDev") and ReplicatedStorage.FishDev:FindFirstChild("Remote") and ReplicatedStorage.FishDev.Remote:FindFirstChild("CaughRemote")
+local catchRemote = RS:FindFirstChild("FishDev") and RS.FishDev:FindFirstChild("Remote") and RS.FishDev.Remote:FindFirstChild("CaughRemote")
 local sellRemote = workspace:FindFirstChild("FishingSeller") and workspace.FishingSeller:FindFirstChild("dialogScript") and workspace.FishingSeller.dialogScript:FindFirstChild("RemoteEvent")
-local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
+local remotesFolder = RS:FindFirstChild("Remotes")
 local useItemRemote = remotesFolder and remotesFolder:FindFirstChild("UseItem")
 local transferMoneyRemote = remotesFolder and remotesFolder:FindFirstChild("TransferMoneyRequest")
 local buyCardRemote = remotesFolder and remotesFolder:FindFirstChild("BuyTransferCard")
 
-local catchArgs = { true, "Easy" }
-local sellArgs = { "SellFish" }
+local catchArgs, sellArgs = { true, "Easy" }, { "SellFish" }
 
-local autoFarm = false
-local autoKick = false
-local autoBuyCard = false
-local startMoney = 0
-
-local selectedTargetPlayer = nil
-local transferAmount = 10
-local autoTransfer = false
-
--- ตัวแปรจัดการ Cooldown ป้องกันการกดถี่เกินไป
+-- ตัวแปรระบบ
+local autoFarm, autoKick, autoBuyCard, autoTransfer = false, false, false, false
+local afkFarm, autoAntiAFK = false, true
+local startMoney, transferAmount, selectedTargetPlayer = 0, 10, nil
+local maxItems, waitMoneyTime = 18, 20
 local lastItemUseTime = 0
-local useCooldown = 1.5 -- เวลารอขั้นต่ำระหว่างการใช้ไอเทมแต่ละครั้ง (วินาที)
+
+-- UI Elements Ref
+local ToggleFarm1, ToggleAFK5
 
 local function safeUseItem(itemName)
-    local currentTime = tick()
-    if currentTime - lastItemUseTime < useCooldown then
-        Rayfield:Notify({
-            Title = "ระบบความปลอดภัย",
-            Content = "กรุณารอ " .. string.format("%.1f", useCooldown - (currentTime - lastItemUseTime)) .. " วินาทีก่อนกดใหม่",
-            Duration = 2,
-        })
-        return
-    end
-
-    local character = LocalPlayer.Character
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-    if not humanoid or humanoid.Health <= 0 then
-        Rayfield:Notify({
-            Title = "ไม่สามารถใช้งานได้",
-            Content = "ตัวละครของคุณยังไม่พร้อมใช้งาน!",
-            Duration = 2,
-        })
-        return
-    end
-
-    if useItemRemote then
-        lastItemUseTime = currentTime
-        pcall(function()
-            useItemRemote:FireServer(itemName)
-        end)
+    if tick() - lastItemUseTime < 1.5 then return end
+    local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+    if hum and hum.Health > 0 and useItemRemote then
+        lastItemUseTime = tick()
+        pcall(function() useItemRemote:FireServer(itemName) end)
     end
 end
 
--- =========================================================================
--- [ หมวดหมู่ 1: ระบบฟาร์มเงิน & โอนเงินอัตโนมัติ ]
--- =========================================================================
+-- ================= [ หมวดหมู่ 1: เสกเงิน ] =================
+Tab1:CreateLabel("⚠️ คำเตือน: มีความเสี่ยงโปรดใช้อย่างระวัง")
 
-TabMain:CreateLabel("⚠️ คำเตือน: มีความเสี่ยงจะโดนแบน โปรดใช้อย่างระวัง")
-
-TabMain:CreateToggle({
-   Name = "ใครอยากรวยกด🤑🤑 (แนะนำใช้รหัสรองฟาร์มแล้วโอนเข้าหลัก)",
+ToggleFarm1 = Tab1:CreateToggle({
+   Name = "ใครอยากรวยกด🤑🤑 (เสกเงินแบบเร็ว)",
    CurrentValue = false,
    Flag = "AutoFarmToggle",
-   Callback = function(Value) autoFarm = Value end,
+   Callback = function(v)
+       if v and afkFarm then
+           Rayfield:Notify({ Title = "แจ้งเตือนระบบ!", Content = "โปรดปิด AFK ฟาร์มเงิน ก่อนเปิดระบบนี้", Duration = 3 })
+           task.spawn(function() ToggleFarm1:Set(false) end)
+           return
+       end
+       autoFarm = v
+   end,
 })
 
-TabMain:CreateToggle({
+Tab1:CreateToggle({
    Name = "ฟาร์มได้เพิ่มครบ 10,000 แล้วเตะออกอัตโนมัติ",
-   CurrentValue = false,
-   Flag = "AutoKickToggle",
-   Callback = function(Value)
-       autoKick = Value
-       if Value then
-           local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
-           if leaderstats then
-               local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
-               if money then startMoney = money.Value end
-           end
+   CurrentValue = false, Callback = function(v)
+       autoKick = v
+       if v then
+           local m = LP:FindFirstChild("leaderstats") and (LP.leaderstats:FindFirstChild("Money") or LP.leaderstats:FindFirstChild("Cash") or LP.leaderstats:FindFirstChild("Gold"))
+           if m then startMoney = m.Value end
        end
    end,
 })
 
-TabMain:CreateDivider()
-TabMain:CreateLabel("💸 ระบบโอนเงินให้เพื่อน")
-
--- สวิตช์เปิด/ปิด ระบบซื้อบัตรโอนเงินอัตโนมัติเมื่อครบ 2,000 บาท
-local BuyCardToggle
-BuyCardToggle = TabMain:CreateToggle({
-   Name = "💳 ซื้อบัตรโอนเงินอัตโนมัติ (เมื่อเงินครบ 2,000)",
-   CurrentValue = false,
-   Flag = "AutoBuyCardToggle",
-   Callback = function(Value)
-       autoBuyCard = Value
-   end,
+Tab1:CreateDivider()
+local BuyCardToggle = Tab1:CreateToggle({
+   Name = "💳 ซื้อบัตรโอนเงินอัตโนมัติ (ครบ 2,000)", CurrentValue = false,
+   Callback = function(v) autoBuyCard = v end,
 })
 
 local function getPlayerNames()
     local list = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then table.insert(list, p.Name) end
-    end
+    for _, p in ipairs(Players:GetPlayers()) do if p ~= LP then table.insert(list, p.Name) end end
     if #list == 0 then table.insert(list, "ไม่พบผู้เล่นอื่นในเซิฟ") end
     return list
 end
 
-local playerDropdown = TabMain:CreateDropdown({
-   Name = "เลือกรายชื่อผู้เล่นในเซิร์ฟ",
-   Options = getPlayerNames(),
-   CurrentOption = "",
-   MultipleOptions = false,
-   Flag = "SelectPlayerDropdown",
-   Callback = function(Option)
-       local targetName = type(Option) == "table" and Option[1] or Option
-       local target = Players:FindFirstChild(targetName)
-       if target then selectedTargetPlayer = target end
+local playerDropdown = Tab1:CreateDropdown({
+   Name = "เลือกรายชื่อผู้เล่น", Options = getPlayerNames(), CurrentOption = "", MultipleOptions = false,
+   Callback = function(Opt)
+       local t = type(Opt) == "table" and Opt[1] or Opt
+       selectedTargetPlayer = Players:FindFirstChild(t)
    end,
 })
 
-TabMain:CreateButton({
-    Name = "🔄 รีเฟรชรายชื่อผู้เล่นในเซิร์ฟ",
-    Callback = function() playerDropdown:Refresh(getPlayerNames(), true) end,
-})
+Tab1:CreateButton({ Name = "🔄 รีเฟรชรายชื่อ", Callback = function() playerDropdown:Refresh(getPlayerNames(), true) end })
+Tab1:CreateInput({ Name = "จำนวนเงินโอนต่อครั้ง", PlaceholderText = "10", NumbersOnly = true, CurrentValue = "10", Callback = function(t) transferAmount = tonumber(t) or 10 end })
 
-TabMain:CreateInput({
-   Name = "จำนวนเงินที่ต้องการโอนต่อครั้ง",
-   PlaceholderText = "ใส่ตัวเลข เช่น 10",
-   NumbersOnly = true,
-   CurrentValue = "10",
-   Flag = "TransferAmountInput",
-   Callback = function(Text)
-       local num = tonumber(Text)
-       if num then transferAmount = num end
-   end,
-})
-
-TabMain:CreateButton({
-   Name = "📤 กดโอนเงินทันที (ตามจำนวนด้านบน)",
+Tab1:CreateButton({
+   Name = "📤 กดโอนเงินทันที",
    Callback = function()
-       if selectedTargetPlayer and selectedTargetPlayer.Parent and transferMoneyRemote then
+       if selectedTargetPlayer and transferMoneyRemote then
            transferMoneyRemote:FireServer(selectedTargetPlayer.UserId, transferAmount)
-           Rayfield:Notify({
-               Title = "โอนเงินสำเร็จ",
-               Content = "โอนเงินจำนวน " .. transferAmount .. " ให้กับ " .. selectedTargetPlayer.Name,
-               Duration = 3,
-           })
-       else
-           Rayfield:Notify({ Title = "เกิดข้อผิดพลาด", Content = "กรุณาเลือกผู้เล่น หรือระบบโอนยังไม่พร้อม!", Duration = 3 })
+           Rayfield:Notify({ Title = "โอนเงินสำเร็จ", Content = "โอน " .. transferAmount .. " ให้ " .. selectedTargetPlayer.Name, Duration = 2 })
        end
    end,
 })
 
-TabMain:CreateToggle({
-   Name = "🔄 เปิดระบบโอนเงินอัตโนมัติ",
-   CurrentValue = false,
-   Flag = "AutoTransferToggle",
-   Callback = function(Value) autoTransfer = Value end,
-})
+Tab1:CreateToggle({ Name = "🔄 เปิดระบบโอนเงินอัตโนมัติ", CurrentValue = false, Callback = function(v) autoTransfer = v end })
 
--- =========================================================================
--- [ หมวดหมู่ 2 & 3: เสกอาคม & เสกปืน ]
--- =========================================================================
+-- ================= [ หมวดหมู่ 2 & 3: อาคม & ปืน ] =================
+local spells = {{"อาคมลิง", "Monkey"}, {"อาคมเสือ", "Tiger"}, {"อาคมอมตะ", "NotDead"}, {"หยุดเวลา", "Zawarudo"}, {"หมัดธนู", "ArrowFist"}, {"ล่องหน", "Invisible"}, {"เรียกศพ", "Necromance"}, {"ตาบอด", "Blind"}, {"กระสุนคด", "BulletKot"}, {"เสกแตน", "Sektan"}, {"ปัดเป่า", "Forest"}, {"พื้นที่อมตะ", "WallZone"}, {"ถอดวิญญาณ", "View"}, {"วาร์ป", "Warp"}}
+for _, s in ipairs(spells) do Tab2:CreateButton({ Name = "ใช้: " .. s[1], Callback = function() safeUseItem(s[2]) end }) end
 
-local spells = {
-    {Name = "อาคมลิง (Monkey)", Item = "Monkey"},
-    {Name = "อาคมเสือ (Tiger)", Item = "Tiger"},
-    {Name = "อาคมอมตะ (NotDead)", Item = "NotDead"},
-    {Name = "อาคมหยุดเวลา (Zawarudo)", Item = "Zawarudo"},
-    {Name = "อาคมหมัดธนู (ArrowFist)", Item = "ArrowFist"},
-    {Name = "อาคมล่องหน (Invisible)", Item = "Invisible"},
-    {Name = "อาคมเรียกศพ (Necromance)", Item = "Necromance"},
-    {Name = "อาคมตาบอด (Blind)", Item = "Blind"},
-    {Name = "อาคมกระสุนคด (BulletKot)", Item = "BulletKot"},
-    {Name = "อาคมเสกแตน (Sektan)", Item = "Sektan"},
-    {Name = "อาคมปัดเป่าสิ่งชั่วร้าย (Forest)", Item = "Forest"},
-    {Name = "อาคมพื้นที่อมตะ (WallZone)", Item = "WallZone"},
-    {Name = "อาคมถอดวิญญาณ (View)", Item = "View"},
-    {Name = "อาคมเคลื่อนย้ายพริบตา (Warp)", Item = "Warp"}
-}
-for _, spell in ipairs(spells) do
-    TabMagic:CreateButton({ 
-        Name = "ใช้อาคม: " .. spell.Name, 
-        Callback = function() 
-            safeUseItem(spell.Item)
-        end 
-    })
-end
+local guns = {{"USP", "USP"}, {"Thompson", "Thompson"}, {"MP40", "MP40"}, {"M870", "M870"}, {"Karabiner", "Karabiner"}, {"SW", "SW"}, {"Mauser", "Mauser"}, {"M1Garand", "M1Garand"}, {"เชือกคาวบอย", "CowboyRope"}}
+for _, g in ipairs(guns) do Tab3:CreateButton({ Name = "เสก: " .. g[1], Callback = function() safeUseItem(g[2]) end }) end
 
-local guns = {
-    {Name = "USP", Item = "USP"},
-    {Name = "Thompson", Item = "Thompson"},
-    {Name = "MP40", Item = "MP40"},
-    {Name = "M870", Item = "M870"},
-    {Name = "Karabiner", Item = "Karabiner"},
-    {Name = "SW", Item = "SW"},
-    {Name = "Mauser", Item = "Mauser"},
-    {Name = "M1Garand", Item = "M1Garand"},
-    {Name = "เชือกคาวบอย", Item = "CowboyRope"}
-}
-for _, gun in ipairs(guns) do
-    TabGuns:CreateButton({ 
-        Name = "เสกปืน: " .. gun.Name, 
-        Callback = function() 
-            safeUseItem(gun.Item)
-        end 
-    })
-end
+-- ================= [ หมวดหมู่ 4: Aimbot ] =================
+local aimbotEnabled, aimbotTeamCheck, aimbotWallCheck = false, false, false
+local fovRadius, fovVisible = 100, true
 
--- =========================================================================
--- [ หมวดหมู่ 4: ระบบ Aimbot ]
--- =========================================================================
-
-TabAimbot:CreateLabel("🎯 ระบบ Aimbot")
-
-local aimbotEnabled = false
-local aimbotTeamCheck = false
-local aimbotWallCheck = false -- เปิดให้ล็อกข้ามกำแพงตั้งแต่เริ่มต้น
-local fovRadius = 100
-local fovVisible = true
-
---  วงกลม FOV
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AimbotMobileFOV"
-ScreenGui.IgnoreGuiInset = false
-pcall(function() ScreenGui.Parent = CoreGui end)
-if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+local ScreenGui = Instance.new("ScreenGui") ScreenGui.Name = "AimbotMobileFOV"
+pcall(function() ScreenGui.Parent = CoreGui end) if not ScreenGui.Parent then ScreenGui.Parent = LP:WaitForChild("PlayerGui") end
 
 local FOVFrame = Instance.new("Frame")
-FOVFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-FOVFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-FOVFrame.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
-FOVFrame.BackgroundTransparency = 1
-FOVFrame.Visible = false
-FOVFrame.Parent = ScreenGui
+FOVFrame.AnchorPoint = Vector2.new(0.5, 0.5) FOVFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVFrame.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2) FOVFrame.BackgroundTransparency = 1 FOVFrame.Visible = false FOVFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(1, 0)
-UICorner.Parent = FOVFrame
+local UICorner = Instance.new("UICorner") UICorner.CornerRadius = UDim.new(1, 0) UICorner.Parent = FOVFrame
+local UIStroke = Instance.new("UIStroke") UIStroke.Color = Color3.fromRGB(255, 255, 255) UIStroke.Thickness = 2 UIStroke.Parent = FOVFrame
 
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 255, 255)
-UIStroke.Thickness = 2
-UIStroke.Parent = FOVFrame
+Tab4:CreateToggle({ Name = "เปิด/ปิด Aimbot", CurrentValue = false, Callback = function(v) aimbotEnabled = v FOVFrame.Visible = fovVisible and v end })
+Tab4:CreateToggle({ Name = "ไม่ล็อกทีมเดียวกัน", CurrentValue = false, Callback = function(v) aimbotTeamCheck = v end })
+Tab4:CreateToggle({ Name = "ล็อกข้ามกำแพง", CurrentValue = false, Callback = function(v) aimbotWallCheck = v end })
+Tab4:CreateDivider()
+Tab4:CreateToggle({ Name = "แสดงวงกลม FOV", CurrentValue = true, Callback = function(v) fovVisible = v FOVFrame.Visible = v and aimbotEnabled end })
+Tab4:CreateSlider({ Name = "ขนาด FOV", Range = {30, 300}, Increment = 5, CurrentValue = 100, Callback = function(v) fovRadius = v FOVFrame.Size = UDim2.new(0, v * 2, 0, v * 2) end })
 
-TabAimbot:CreateToggle({
-   Name = "เปิด/ปิด Aimbot (ล็อกเป้า)",
-   CurrentValue = false,
-   Flag = "AimbotToggle",
-   Callback = function(Value)
-       aimbotEnabled = Value
-       FOVFrame.Visible = fovVisible and Value
-   end,
-})
-
-TabAimbot:CreateToggle({
-   Name = "ไม่ล็อกทีมตัวเอง (Team Check)",
-   CurrentValue = false,
-   Flag = "AimbotTeamCheckToggle",
-   Callback = function(Value) aimbotTeamCheck = Value end,
-})
-
-TabAimbot:CreateToggle({
-   Name = " ล็อกข้ามกำแพง (Wall Check)",
-   CurrentValue = false,
-   Flag = "AimbotWallCheckToggle",
-   Callback = function(Value) aimbotWallCheck = Value end,
-})
-
-TabAimbot:CreateDivider()
-
-TabAimbot:CreateToggle({
-   Name = " แสดงวงกลม FOV ",
-   CurrentValue = true,
-   Flag = "FOVVisibleToggle",
-   Callback = function(Value)
-       fovVisible = Value
-       FOVFrame.Visible = Value and aimbotEnabled
-   end,
-})
-
-TabAimbot:CreateSlider({
-   Name = "ปรับขนาดวงกลมล็อกเป้า (FOV Size)",
-   Range = {30, 300},
-   Increment = 5,
-   Suffix = " px",
-   CurrentValue = 100,
-   Flag = "FOVRadiusSlider",
-   Callback = function(Value)
-       fovRadius = Value
-       FOVFrame.Size = UDim2.new(0, Value * 2, 0, Value * 2)
-   end,
-})
-
--- ฟังก์ชันเช็คกำแพง
-local function isTargetVisible(targetPart)
-    if not aimbotWallCheck then return true end
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterType = RaycastFilterType.Exclude
-    if LocalPlayer.Character then
-        raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetPart.Parent}
-    end
-    raycastParams.IgnoreWater = true
-
-    local origin = workspace.CurrentCamera.CFrame.Position
-    local direction = (targetPart.Position - origin)
-    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-    return raycastResult == nil
-end
-
--- ฟังก์ชันคำนวณจุดศูนย์กลางจอ
-local function getCenterScreen()
-    local cam = workspace.CurrentCamera
-    if not cam then return Vector2.new(0,0) end
-    local viewportSize = cam.ViewportSize
-    local inset = GuiService:GetGuiInset()
-    return Vector2.new(viewportSize.X / 2, (viewportSize.Y - inset.Y) / 2)
-end
-
--- ฟังก์ชันหาเป้าหมาย
 local function getClosestPlayer()
-    local targetPart = nil
-    local shortestDistance = fovRadius
-    local screenCenter = getCenterScreen()
+    local targetPart, shortestDistance = nil, fovRadius
     local cam = workspace.CurrentCamera
-
     if not cam then return nil end
+    local inset = GuiS:GetGuiInset()
+    local screenCenter = Vector2.new(cam.ViewportSize.X / 2, (cam.ViewportSize.Y - inset.Y) / 2)
 
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-            
-            if humanoid and humanoid.Health > 0 and rootPart then
-                local isEnemy = true
-                if aimbotTeamCheck and LocalPlayer.Team and player.Team and LocalPlayer.Team == player.Team then
-                    isEnemy = false
-                end
-
-                if isEnemy then
-                    local screenPoint, onScreen = cam:WorldToViewportPoint(rootPart.Position)
-                    if onScreen then
-                        local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
-
-                        if distance < shortestDistance and isTargetVisible(rootPart) then
-                            shortestDistance = distance
-                            targetPart = rootPart
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+            local root = p.Character:FindFirstChild("HumanoidRootPart")
+            if root and (not aimbotTeamCheck or p.Team ~= LP.Team) then
+                local pos, onScreen = cam:WorldToViewportPoint(root.Position)
+                if onScreen then
+                    local dist = (Vector2.new(pos.X, pos.Y) - screenCenter).Magnitude
+                    if dist < shortestDistance then
+                        if not aimbotWallCheck then
+                            local params = RaycastParams.new() params.FilterType = RaycastFilterType.Exclude params.FilterDescendantsInstances = {LP.Character, p.Character}
+                            if not workspace:Raycast(cam.CFrame.Position, root.Position - cam.CFrame.Position, params) then
+                                shortestDistance = dist targetPart = root
+                            end
+                        else
+                            shortestDistance = dist targetPart = root
                         end
                     end
                 end
@@ -422,118 +186,117 @@ local function getClosestPlayer()
     return targetPart
 end
 
--- =========================================================================
--- [ ลูปการทำงาน Aimbot & Background ]
--- =========================================================================
-
-RunService.RenderStepped:Connect(function()
+RunS.RenderStepped:Connect(function()
     if aimbotEnabled then
-        local targetPart = getClosestPlayer()
-        local cam = workspace.CurrentCamera
-        if targetPart and cam then
-            cam.CFrame = CFrame.new(cam.CFrame.Position, targetPart.Position)
-        end
+        local target = getClosestPlayer()
+        if target and workspace.CurrentCamera then workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Position) end
     end
 end)
 
+-- ================= [ หมวดหมู่ 5: AFK ฟาร์มเงิน & คู่มือ ] =================
+ToggleAFK5 = Tab5:CreateToggle({
+   Name = "🤖 เปิด/ปิด ระบบ AFK ฟาร์มเงิน (รอของ & รอเงิน)",
+   CurrentValue = false,
+   Callback = function(v)
+       if v and autoFarm then
+           Rayfield:Notify({ Title = "แจ้งเตือนระบบ!", Content = "โปรดปิด หมวดเสกเงิน ก่อนเปิดระบบนี้", Duration = 3 })
+           task.spawn(function() ToggleAFK5:Set(false) end)
+           return
+       end
+       afkFarm = v
+   end,
+})
+
+Tab5:CreateInput({ Name = "📦 จำนวนของที่รอต่อรอบ", PlaceholderText = "18", NumbersOnly = true, CurrentValue = "18", Callback = function(t) maxItems = tonumber(t) or 18 end })
+Tab5:CreateInput({ Name = "⏳ เวลารอเงิน (วินาที)", PlaceholderText = "20", NumbersOnly = true, CurrentValue = "20", Callback = function(t) waitMoneyTime = tonumber(t) or 20 end })
+Tab5:CreateToggle({ Name = "🏃 Anti-AFK (กันหลุด)", CurrentValue = true, Callback = function(v) autoAntiAFK = v end })
+
+Tab5:CreateDivider()
+Tab5:CreateLabel("💡 คู่มือการใช้งาน AFK")
+Tab5:CreateParagraph({ Title = "🎒 1. ความจุช่องกระเป๋า", Content = "เช็คกระเป๋าของคุณ เช่น 18, 30 หรือ 50 ให้กรอกตัวเลขตามความจุในช่อง 'จำนวนของที่รอ'" })
+Tab5:CreateParagraph({ Title = "⏳ 2. เวลารอเงิน", Content = "ตั้งไว้ที่ 20 - 30 วินาที เพื่อให้ระบบประมวลผลขายของเข้าตัวได้ครบถ้วน" })
+
+-- ================= [ ลูปการทำงานหลังบ้าน ] =================
+
+-- ลูปเสกเงิน (หมวด 1)
 task.spawn(function()
     while true do
-        if autoFarm and catchRemote then 
+        if autoFarm and catchRemote and sellRemote then
             pcall(function() catchRemote:FireServer(unpack(catchArgs)) end)
-            task.wait(0.05)
-        else 
-            task.wait(0.2) 
-        end
-    end
-end)
-
-task.spawn(function()
-    while true do
-        if autoFarm and sellRemote then 
             pcall(function() sellRemote:FireServer(unpack(sellArgs)) end)
             task.wait(0.05)
-        else 
-            task.wait(0.2) 
+        else
+            task.wait(0.3)
         end
     end
 end)
 
+-- ลูป AFK ฟาร์มเงิน (หมวด 5)
 task.spawn(function()
     while true do
-        if autoKick then
-            local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
-            if leaderstats then
-                local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
-                if money and (money.Value - startMoney) >= 10000 then
-                    LocalPlayer:Kick("ฟาร์มเงินครบ 10,000 เรียบร้อยแล้ว!")
-                    break
+        if afkFarm and catchRemote and sellRemote then
+            for i = 1, maxItems do
+                if not afkFarm then break end
+                pcall(function() catchRemote:FireServer(unpack(catchArgs)) end)
+                task.wait(0.05)
+            end
+            
+            if afkFarm then
+                local elapsed = 0
+                while elapsed < waitMoneyTime and afkFarm do
+                    task.wait(1)
+                    elapsed = elapsed + 1
+                end
+                if afkFarm then
+                    for i = 1, 5 do pcall(function() sellRemote:FireServer(unpack(sellArgs)) end) task.wait(0.1) end
                 end
             end
             task.wait(0.5)
-        else 
-            task.wait(0.5) 
-        end
-    end
-end)
-
--- ลูปตรวจจับเงิน และซื้อบัตรโอนอัตโนมัติเมื่อครบ 2,000 บาท
-task.spawn(function()
-    while true do
-        if autoBuyCard then
-            local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
-            if leaderstats then
-                local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
-                if money and money.Value >= 2000 then
-                    if buyCardRemote then
-                        local success, result = pcall(function()
-                            return buyCardRemote:InvokeServer()
-                        end)
-
-                        -- ตรวจสอบคำตอบจาก Server (หากสำเร็จ หรือหากมีบัตรแล้ว/ซื้อซ้ำไม่ได้)
-                        if success then
-                            if result == false or (type(result) == "string" and string.find(string.lower(result), "already")) then
-                                Rayfield:Notify({
-                                    Title = "แจ้งเตือนระบบ",
-                                    Content = "คุณมีบัตรโอนเงินอยู่แล้ว ไม่สามารถซื้อซ้ำได้!",
-                                    Duration = 4,
-                                })
-                            else
-                                Rayfield:Notify({
-                                    Title = "ซื้อบัตรโอนเงินสำเร็จ!",
-                                    Content = "ระบบตัดเงินซื้อบัตรเรียบร้อยแล้ว (2,000 บาท)",
-                                    Duration = 4,
-                                })
-                            end
-                        else
-                            Rayfield:Notify({
-                                Title = "เกิดข้อผิดพลาด",
-                                Content = "ไม่สามารถทำรายการซื้อบัตรได้",
-                                Duration = 3,
-                            })
-                        end
-                    end
-                    
-                    -- ทำการสั่งปิดสวิตช์อัตโนมัติทันที
-                    autoBuyCard = false
-                    if BuyCardToggle then
-                        BuyCardToggle:Set(false)
-                    end
-                end
-            end
-            task.wait(1)
         else
-            task.wait(1)
+            task.wait(0.5)
         end
+    end
+end)
+
+-- ลูประบบเสริม
+task.spawn(function()
+    while true do
+        if autoKick then
+            local m = LP:FindFirstChild("leaderstats") and (LP.leaderstats:FindFirstChild("Money") or LP.leaderstats:FindFirstChild("Cash") or LP.leaderstats:FindFirstChild("Gold"))
+            if m and (m.Value - startMoney) >= 10000 then LP:Kick("ฟาร์มเงินครบ 10,000 แล้ว!") break end
+        end
+        task.wait(0.5)
     end
 end)
 
 task.spawn(function()
     while true do
-        if autoTransfer and selectedTargetPlayer and selectedTargetPlayer.Parent and transferMoneyRemote then
+        if autoBuyCard and buyCardRemote then
+            local m = LP:FindFirstChild("leaderstats") and (LP.leaderstats:FindFirstChild("Money") or LP.leaderstats:FindFirstChild("Cash") or LP.leaderstats:FindFirstChild("Gold"))
+            if m and m.Value >= 2000 then
+                pcall(function() buyCardRemote:InvokeServer() end)
+                autoBuyCard = false BuyCardToggle:Set(false)
+            end
+        end
+        task.wait(1)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if autoTransfer and selectedTargetPlayer and transferMoneyRemote then
             pcall(function() transferMoneyRemote:FireServer(selectedTargetPlayer.UserId, transferAmount) end)
             task.wait(1)
-        else 
-            task.wait(0.5) 
+        else task.wait(0.5) end
+    end
+end)
+
+-- Anti-AFK ทุก 10 นาที
+task.spawn(function()
+    while true do
+        task.wait(600)
+        if autoAntiAFK and LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") then
+            pcall(function() LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end)
         end
     end
 end)
