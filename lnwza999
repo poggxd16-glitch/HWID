@@ -70,8 +70,10 @@ local GuiService = game:GetService("GuiService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local catchRemote = ReplicatedStorage:FindFirstChild("FishDev") and ReplicatedStorage.FishDev:FindFirstChild("Remote") and ReplicatedStorage.FishDev.Remote:FindFirstChild("CaughRemote")
 local sellRemote = workspace:FindFirstChild("FishingSeller") and workspace.FishingSeller:FindFirstChild("dialogScript") and workspace.FishingSeller.dialogScript:FindFirstChild("RemoteEvent")
-local useItemRemote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("UseItem")
-local transferMoneyRemote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("TransferMoneyRequest")
+local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
+local useItemRemote = remotesFolder and remotesFolder:FindFirstChild("UseItem")
+local transferMoneyRemote = remotesFolder and remotesFolder:FindFirstChild("TransferMoneyRequest")
+local buyCardRemote = remotesFolder and remotesFolder:FindFirstChild("BuyTransferCard")
 
 local catchArgs = { true, "Easy" }
 local sellArgs = { "SellFish" }
@@ -83,6 +85,40 @@ local startMoney = 0
 local selectedTargetPlayer = nil
 local transferAmount = 10
 local autoTransfer = false
+
+-- ตัวแปรจัดการ Cooldown ป้องกันการกดถี่เกินไป
+local lastItemUseTime = 0
+local useCooldown = 1.5 -- เวลารอขั้นต่ำระหว่างการใช้ไอเทมแต่ละครั้ง (วินาที)
+
+local function safeUseItem(itemName)
+    local currentTime = tick()
+    if currentTime - lastItemUseTime < useCooldown then
+        Rayfield:Notify({
+            Title = "ระบบความปลอดภัย",
+            Content = "กรุณารอ " .. string.format("%.1f", useCooldown - (currentTime - lastItemUseTime)) .. " วินาทีก่อนกดใหม่",
+            Duration = 2,
+        })
+        return
+    end
+
+    local character = LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then
+        Rayfield:Notify({
+            Title = "ไม่สามารถใช้งานได้",
+            Content = "ตัวละครของคุณยังไม่พร้อมใช้งาน!",
+            Duration = 2,
+        })
+        return
+    end
+
+    if useItemRemote then
+        lastItemUseTime = currentTime
+        pcall(function()
+            useItemRemote:FireServer(itemName)
+        end)
+    end
+end
 
 -- =========================================================================
 -- [ หมวดหมู่ 1: ระบบฟาร์มเงิน & โอนเงินอัตโนมัติ ]
@@ -115,6 +151,30 @@ TabMain:CreateToggle({
 
 TabMain:CreateDivider()
 TabMain:CreateLabel("💸 ระบบโอนเงินให้เพื่อน")
+
+-- ปุ่มซื้อบัตรโอนเงิน
+TabMain:CreateButton({
+   Name = "💳 ซื้อบัตรโอนเงิน (2,000 บาท)",
+   Callback = function()
+       if buyCardRemote then
+           local success, result = pcall(function()
+               return buyCardRemote:InvokeServer()
+           end)
+           
+           if success then
+               Rayfield:Notify({
+                   Title = "ส่งคำขอซื้อบัตรโอนแล้ว",
+                   Content = "ตรวจสอบเงินในตัวหากตัดเงินสำเร็จจะโอนได้ทันที",
+                   Duration = 3,
+               })
+           else
+               Rayfield:Notify({ Title = "เกิดข้อผิดพลาด", Content = "ไม่สามารถซื้อบัตรโอนได้", Duration = 3 })
+           end
+       else
+           Rayfield:Notify({ Title = "เกิดข้อผิดพลาด", Content = "ไม่พบระบบซื้อบัตรโอนในเกมนี้!", Duration = 3 })
+       end
+   end,
+})
 
 local function getPlayerNames()
     local list = {}
@@ -193,17 +253,16 @@ local spells = {
     {Name = "อาคมตาบอด (Blind)", Item = "Blind"},
     {Name = "อาคมกระสุนคด (BulletKot)", Item = "BulletKot"},
     {Name = "อาคมเสกแตน (Sektan)", Item = "Sektan"},
-    -- อาคมที่เพิ่มเข้ามาใหม่
     {Name = "อาคมปัดเป่าสิ่งชั่วร้าย (Forest)", Item = "Forest"},
     {Name = "อาคมพื้นที่อมตะ (WallZone)", Item = "WallZone"},
-    {Name = "อาคมเคลื่อนย้ายพริบตา (View)", Item = "View"},
-    {Name = อาคมเคลื่อนย้ายหาผู้คน (Warp)", Item = "Warp"}
+    {Name = "อาคมถอดวิญญาณ (View)", Item = "View"},
+    {Name = "อาคมเคลื่อนย้ายพริบตา (Warp)", Item = "Warp"}
 }
 for _, spell in ipairs(spells) do
     TabMagic:CreateButton({ 
         Name = "ใช้อาคม: " .. spell.Name, 
         Callback = function() 
-            if useItemRemote then useItemRemote:FireServer(spell.Item) end 
+            safeUseItem(spell.Item)
         end 
     })
 end
@@ -223,7 +282,7 @@ for _, gun in ipairs(guns) do
     TabGuns:CreateButton({ 
         Name = "เสกปืน: " .. gun.Name, 
         Callback = function() 
-            if useItemRemote then useItemRemote:FireServer(gun.Item) end 
+            safeUseItem(gun.Item)
         end 
     })
 end
