@@ -80,6 +80,7 @@ local sellArgs = { "SellFish" }
 
 local autoFarm = false
 local autoKick = false
+local autoBuyCard = false
 local startMoney = 0
 
 local selectedTargetPlayer = nil
@@ -152,27 +153,14 @@ TabMain:CreateToggle({
 TabMain:CreateDivider()
 TabMain:CreateLabel("💸 ระบบโอนเงินให้เพื่อน")
 
--- ปุ่มซื้อบัตรโอนเงิน
-TabMain:CreateButton({
-   Name = "💳 ซื้อบัตรโอนเงิน (2,000 บาท)",
-   Callback = function()
-       if buyCardRemote then
-           local success, result = pcall(function()
-               return buyCardRemote:InvokeServer()
-           end)
-           
-           if success then
-               Rayfield:Notify({
-                   Title = "ส่งคำขอซื้อบัตรโอนแล้ว",
-                   Content = "ตรวจสอบเงินในตัวหากตัดเงินสำเร็จจะโอนได้ทันที",
-                   Duration = 3,
-               })
-           else
-               Rayfield:Notify({ Title = "เกิดข้อผิดพลาด", Content = "ไม่สามารถซื้อบัตรโอนได้", Duration = 3 })
-           end
-       else
-           Rayfield:Notify({ Title = "เกิดข้อผิดพลาด", Content = "ไม่พบระบบซื้อบัตรโอนในเกมนี้!", Duration = 3 })
-       end
+-- สวิตช์เปิด/ปิด ระบบซื้อบัตรโอนเงินอัตโนมัติเมื่อครบ 2,000 บาท
+local BuyCardToggle
+BuyCardToggle = TabMain:CreateToggle({
+   Name = "💳 ซื้อบัตรโอนเงินอัตโนมัติ (เมื่อเงินครบ 2,000)",
+   CurrentValue = false,
+   Flag = "AutoBuyCardToggle",
+   Callback = function(Value)
+       autoBuyCard = Value
    end,
 })
 
@@ -417,7 +405,7 @@ local function getClosestPlayer()
                     isEnemy = false
                 end
 
-                if isEnemy then
+                if isEnemy me
                     local screenPoint, onScreen = cam:WorldToViewportPoint(rootPart.Position)
                     if onScreen then
                         local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
@@ -484,6 +472,57 @@ task.spawn(function()
             task.wait(0.5)
         else 
             task.wait(0.5) 
+        end
+    end
+end)
+
+-- ลูปตรวจจับเงิน และซื้อบัตรโอนอัตโนมัติเมื่อครบ 2,000 บาท
+task.spawn(function()
+    while true do
+        if autoBuyCard then
+            local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
+            if leaderstats then
+                local money = leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Gold")
+                if money and money.Value >= 2000 then
+                    if buyCardRemote then
+                        local success, result = pcall(function()
+                            return buyCardRemote:InvokeServer()
+                        end)
+
+                        -- ตรวจสอบคำตอบจาก Server (หากสำเร็จ หรือหากมีบัตรแล้ว/ซื้อซ้ำไม่ได้)
+                        if success then
+                            if result == false or (type(result) == "string" and string.find(string.lower(result), "already")) then
+                                Rayfield:Notify({
+                                    Title = "แจ้งเตือนระบบ",
+                                    Content = "คุณมีบัตรโอนเงินอยู่แล้ว ไม่สามารถซื้อซ้ำได้!",
+                                    Duration = 4,
+                                })
+                            else
+                                Rayfield:Notify({
+                                    Title = "ซื้อบัตรโอนเงินสำเร็จ!",
+                                    Content = "ระบบตัดเงินซื้อบัตรเรียบร้อยแล้ว (2,000 บาท)",
+                                    Duration = 4,
+                                })
+                            end
+                        else
+                            Rayfield:Notify({
+                                Title = "เกิดข้อผิดพลาด",
+                                Content = "ไม่สามารถทำรายการซื้อบัตรได้",
+                                Duration = 3,
+                            })
+                        end
+                    end
+                    
+                    -- ทำการสั่งปิดสวิตช์อัตโนมัติทันที
+                    autoBuyCard = false
+                    if BuyCardToggle then
+                        BuyCardToggle:Set(false)
+                    end
+                end
+            end
+            task.wait(1)
+        else
+            task.wait(1)
         end
     end
 end)
