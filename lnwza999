@@ -405,7 +405,7 @@ local function getClosestPlayer()
                     isEnemy = false
                 end
 
-                if isEnemy me
+                if isEnemy then
                     local screenPoint, onScreen = cam:WorldToViewportPoint(rootPart.Position)
                     if onScreen then
                         local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
