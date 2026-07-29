@@ -196,8 +196,8 @@ local spells = {
     -- อาคมที่เพิ่มเข้ามาใหม่
     {Name = "อาคมปัดเป่าสิ่งชั่วร้าย (Forest)", Item = "Forest"},
     {Name = "อาคมพื้นที่อมตะ (WallZone)", Item = "WallZone"},
-    {Name = "อาคมถอดวิญญาณ (View)", Item = "View"},
-    {Name = "อาคมเคลื่อนย้ายพริบตา (Warp)", Item = "Warp"}
+    {Name = "อาคมเคลื่อนย้ายพริบตา (View)", Item = "View"},
+    {Name = อาคมเคลื่อนย้ายหาผู้คน (Warp)", Item = "Warp"}
 }
 for _, spell in ipairs(spells) do
     TabMagic:CreateButton({ 
