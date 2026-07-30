@@ -9,7 +9,7 @@ local deviceKeys = {
    ["721ef9cef47017a98efe7a8a4b509e0de8b990444b73d32ca9d60e0196d13c78"] = "lnwza999",
    ["b530aa50f5a4eb053933b58b65a0b98a1b62aadd8ea2d2f7d6205e50905129e8"] = "yokai832",
    ["8e84b2fa6c0fe395af892e16987e69a3c33cdb62f90ba512f6bb5d122e63a9a5"] = "yokai372",
-   ["HWID-ของมือถือเพื่อน3"] = "yokai381", ["HWID-ของมือถือเพื่อน4"] = "yokai823",
+   ["8ae88ec7403157e80d99287401aa39a5d8624d93a4fb62c7c83daf66a70a73ab"] = "yokai381", ["HWID-ของมือถือเพื่อน4"] = "yokai823",
    ["HWID-ของมือถือเพื่อน5"] = "yokai282", ["HWID-ของมือถือเพื่อน6"] = "yokai782",
    ["HWID-ของมือถือเพื่อน7"] = "yokai281", ["HWID-ของมือถือเพื่อน8"] = "yokai384",
    ["HWID-ของมือถือเพื่อน9"] = "yokai304"
